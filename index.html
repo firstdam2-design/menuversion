@@ -3,83 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>농구심판연습 v1.9</title>
+    <title>농구심판연습 v2.1</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         :root { --main-dark: #2c3e50; --lead-red: #e74c3c; --trail-blue: #3498db; }
-        body { background-color: #f1f3f5; font-family: 'Malgun Gothic', sans-serif; margin: 0; }
+        body { background-color: #f4f7f6; font-family: 'Malgun Gothic', sans-serif; margin: 0; }
         
-        /* 기획서 7P: 상단 태그 포맷 */
-        .tag-group { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .tag-block { padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.95em; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .bg-pos { background-color: var(--main-dark); }
-        .bg-qtr { background-color: #d35400; }
-        .bg-dir { background-color: #27ae60; }
+        /* 헤더 타이틀 및 버전 */
+        .app-header { background-color: var(--main-dark); color: white; padding: 15px; text-align: center; }
+        .version-tag { font-size: 0.75em; color: #95a5a6; font-weight: normal; margin-left: 5px; }
 
-        /* 정보 카드 디자인 */
-        .card-main { min-height: 380px; background: white; border-radius: 12px; border-top: 10px solid var(--main-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 25px; }
-        .team-box { padding: 18px; border-radius: 8px; margin: 15px 0; font-weight: 800; font-size: 1.2em; border: 1px solid #eee; }
+        /* 기획서 7P: 상단 태그 레이아웃 */
+        .tag-row { display: flex; gap: 6px; justify-content: center; margin: 15px 0; }
+        .tag-item { padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em; color: white; }
+        .tag-pos { background-color: #34495e; }
+        .tag-qtr { background-color: #d35400; }
+        .tag-dir { background-color: #27ae60; }
+
+        /* 메인 카드 박스 */
+        .card-main { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 20px; max-width: 550px; margin: 0 auto; border-top: 6px solid var(--main-dark); }
         
-        /* 심판 포지션별 시인성 보더 */
-        .border-lead { border-left: 10px solid var(--lead-red); background-color: #fff9f9; }
-        .border-trail { border-left: 10px solid var(--trail-blue); background-color: #f9fcff; }
+        /* 기획서 7P: 정보 박스 (괄호 없이 깔끔하게) */
+        .team-box { padding: 14px; border-radius: 8px; margin: 8px 0; font-weight: 900; font-size: 1.25em; border: 1px solid #eee; text-align: center; }
+        .focus-lead { border-left: 10px solid var(--lead-red); background-color: #fff9f9; }
+        .focus-trail { border-left: 10px solid var(--trail-blue); background-color: #f9fcff; }
         
-        .situation-box { background-color: #f8f9fa; border: 1px dashed #ccc; padding: 20px; margin-top: 20px; border-radius: 8px; }
+        /* 기획서 7P: 점선 상황 박스 */
+        .situ-box { border: 2px dashed #ccc; padding: 18px; margin-top: 15px; border-radius: 8px; background-color: #fafafa; position: relative; }
+        .situ-label { color: #888; font-weight: bold; font-size: 0.8em; display: block; margin-bottom: 6px; }
+        .situ-text { font-size: 1.1em; line-height: 1.5; color: #222; font-weight: 500; }
+
         .hidden { display: none !important; }
-        .btn-ox { font-size: 2.2em; width: 45%; margin: 2%; font-weight: bold; height: 100px; }
+        .tablink { font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .w3-orange { color: white !important; }
     </style>
 </head>
 <body>
 
-<div class="w3-bar w3-black w3-card">
-    <button class="w3-bar-item w3-button tablink w3-orange" onclick="openTab(event,'Lead')">리드</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Trail')">트레일</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Total')">종합</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Quiz')">퀴즈</button>
+<div class="app-header">
+    <h3 style="margin:0;"><b>농구심판연습</b> <span class="version-tag">v2.1</span></h3>
+</div>
+
+<div class="w3-bar w3-light-grey w3-border-bottom">
+    <button class="w3-bar-item w3-button tablink" id="tab-Lead" onclick="changeTab('Lead')">리드</button>
+    <button class="w3-bar-item w3-button tablink" id="tab-Trail" onclick="changeTab('Trail')">트레일</button>
+    <button class="w3-bar-item w3-button tablink" id="tab-Total" onclick="changeTab('Total')">종합</button>
+    <button class="w3-bar-item w3-button tablink" id="tab-Quiz" onclick="changeTab('Quiz')">퀴즈</button>
 </div>
 
 <div class="w3-container w3-padding-24">
     
-    <div id="SimView" class="tab-content">
-        <div id="tag-area" class="tag-group"></div>
+    <div id="SimSection">
+        <div id="tag-area" class="tag-row"></div>
         
-        <div class="w3-card-4 card-main">
-            <div id="display-content">
-                <p class="w3-center w3-padding-64 w3-text-grey">포지션 메뉴를 선택하고 상황을 생성하세요.</p>
+        <div class="card-main">
+            <div id="display-area">
+                <p class="w3-center w3-padding-48 w3-text-grey">포지션 선택 후 <b>[새 상황 생성]</b> 버튼을 누르세요.</p>
             </div>
-            <div id="guide-area" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden w3-padding w3-margin-top"></div>
-        </div>
-
-        <div class="w3-margin-top">
-            <button id="gen-btn" class="w3-button w3-dark-grey w3-round-large w3-padding-large w3-block w3-margin-bottom">새 상황 생성</button>
-            <button class="w3-button w3-blue-grey w3-round-large w3-padding-large w3-block" onclick="toggleGuide()">지침 확인 (Rule)</button>
+            
+            <div id="guide-box" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden w3-padding w3-small"></div>
+            
+            <div class="w3-margin-top">
+                <button onclick="handleGenerate()" class="w3-button w3-dark-grey w3-block w3-round-large w3-padding-large">새 상황 생성</button>
+                <button onclick="toggleGuide()" class="w3-button w3-white w3-border w3-block w3-round-large w3-margin-top">지침 확인 (해설)</button>
+            </div>
         </div>
     </div>
 
-    <div id="QuizView" class="tab-content hidden">
+    <div id="QuizSection" class="hidden">
+        <div class="card-main w3-center w3-padding-64">
+            <h4><b>퀴즈 엔진</b></h4>
+            <p>준비된 퀴즈 시스템을 실행합니다.</p>
+            <button class="w3-button w3-purple w3-round">START QUIZ</button>
         </div>
+    </div>
 
 </div>
 
 <script>
+/* 데이터 정의 (기획서 2, 3P 표 내용) */
+const leadData = [
+    {s: "드라이브 인 슛 시도 중 수비자 실린더 침범 및 신체 접촉 발생", g: "리드: 수비자의 LGP 유지 여부와 수직권 침범을 우선 확인."},
+    {s: "베이스라인(엔드라인) 부근 볼 경합 및 아웃 오브 바운드", g: "리드: 전담 구역으로서 즉각적인 방향 지시와 신호 필수."},
+    {s: "로우 포스트 몸싸움 중 공격자의 팔꿈치 과도 사용", g: "리드: 공격자의 부자연스러운 동작 및 오펜스 파울 감시."},
+    {s: "슈팅 후 볼이 림 위에 있을 때 수비자의 터치", g: "리드: 바스켓 인터피어런스/골텐딩 여부를 정밀 판정."}
+];
+
+const trailData = [
+    {s: "외곽 3점슛 시도 시 수비자의 랜딩 존(착지 공간) 침범", g: "트레일: 슈터의 발 위치 확인 및 착지 시 안전 확보 여부 판정."},
+    {s: "프론트코트 볼 운반 중 8초 바이얼레이션 발생", g: "트레일: 하프라인 진입 시간 주기적 체크 및 바이얼레이션 선언."},
+    {s: "하이포스트 온볼 스크린 중 스크리너의 불법적 이동", g: "트레일: 스크리너의 실린더와 이동 경로 방해 여부 확인."},
+    {s: "쿼터 종료 부저와 동시 시도된 슛의 득점 인정 여부", g: "트레일: 종료 시그널 전 볼 이탈 여부 최종 결정권자."}
+];
+
 const teamColors = [
-    {name: "WHITE", hex: "#444444"}, {name: "BLACK", hex: "#000000"},
-    {name: "RED", hex: "#e74c3c"}, {name: "BLUE", hex: "#3498db"},
-    {name: "YELLOW", hex: "#f1c40f"}, {name: "GREEN", hex: "#27ae60"}
+    {n: "WHITE", c: "#444444"}, {n: "BLACK", c: "#000000"},
+    {n: "RED", c: "#e74c3c"}, {n: "BLUE", c: "#3498db"},
+    {n: "YELLOW", c: "#b7950b"}, {n: "GREEN", c: "#1e8449"}
 ];
 
-/* 기획서 2P: 리드 심판 표 내용 */
-const leadCases = [
-    {s: "드라이브 인 시 신체 접촉 발생", g: "수비자의 실린더 유지 및 합법적 가딩 포지션(LGP) 확인."},
-    {s: "베이스라인 터치아웃 상황", g: "리드 심판 전담 구역. 즉각적인 호각과 방향 시그널."},
-    {s: "로우 포스트 포스트 업 몸싸움", g: "공격자의 팔꿈치 사용 및 수비자의 밀기 파울 주의."},
-    {s: "슈팅 후 바스켓 인터피어런스", g: "림 위 볼의 터치 여부를 가장 가까운 위치에서 판정."},
-    {s: "필드 골 성공 후 드로인 관리", g: "베이스라인 이동 가능 여부 확인 및 엔드라인 관리."}
-];
+let activeMode = 'Lead';
 
-/* 기획서 3P: 트레일 심판 표 내용 */
-const trailCases = [
-    {s: "외곽 3점슛 시도와 착지 공간", g: "슈터의 발 위치 및 수비자의 랜딩 구역 침범 확인."},
-    {s: "백코트 볼 운반 중 8초 바이얼레이션", g: "경기 시간 체크 및 프론트코트 진입 시점 감시."},
-    {s: "하이포스트 온볼 스크린 상황", g: "스크리너의 합법적 위치 및 일리걸 스크린 여부 판정."},
-    {s: "공격 전
+/* 탭 전환 로직 디버깅 완료 */
+function changeTab(mode) {
+    activeMode = mode;
+    
+    // 섹션 표시 전환
+    document.getElementById('SimSection').style.display = (mode === 'Quiz') ? 'none' : 'block';
+    document.getElementById('QuizSection').
