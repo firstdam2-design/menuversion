@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>농구심판연습 v1.8</title>
+    <title>농구심판연습 v1.9</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         :root { --main-dark: #2c3e50; --lead-red: #e74c3c; --trail-blue: #3498db; }
         body { background-color: #f1f3f5; font-family: 'Malgun Gothic', sans-serif; margin: 0; }
         
         /* 기획서 7P: 상단 태그 포맷 */
-        .tag-group { margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .tag-block { padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9em; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tag-group { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .tag-block { padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.95em; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .bg-pos { background-color: var(--main-dark); }
         .bg-qtr { background-color: #d35400; }
         .bg-dir { background-color: #27ae60; }
 
         /* 정보 카드 디자인 */
-        .card-main { min-height: 350px; background: white; border-radius: 12px; border-top: 8px solid var(--main-dark); box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; }
-        .team-info { padding: 15px; border-radius: 8px; margin: 12px 0; font-weight: bold; font-size: 1.1em; border: 2px solid #eee; transition: 0.3s; }
+        .card-main { min-height: 380px; background: white; border-radius: 12px; border-top: 10px solid var(--main-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 25px; }
+        .team-box { padding: 18px; border-radius: 8px; margin: 15px 0; font-weight: 800; font-size: 1.2em; border: 1px solid #eee; }
         
-        /* 포지션별 시점 강조 (보더만 사용, 텍스트 컬러는 팀컬러에 따름) */
-        .lead-view { border-left: 8px solid var(--lead-red); }
-        .trail-view { border-left: 8px solid var(--trail-blue); }
+        /* 심판 포지션별 시인성 보더 */
+        .border-lead { border-left: 10px solid var(--lead-red); background-color: #fff9f9; }
+        .border-trail { border-left: 10px solid var(--trail-blue); background-color: #f9fcff; }
         
+        .situation-box { background-color: #f8f9fa; border: 1px dashed #ccc; padding: 20px; margin-top: 20px; border-radius: 8px; }
         .hidden { display: none !important; }
         .btn-ox { font-size: 2.2em; width: 45%; margin: 2%; font-weight: bold; height: 100px; }
     </style>
@@ -44,14 +45,14 @@
         
         <div class="w3-card-4 card-main">
             <div id="display-content">
-                <p class="w3-center w3-padding-64 w3-text-grey">포지션 선택 후 상황을 생성하세요.</p>
+                <p class="w3-center w3-padding-64 w3-text-grey">포지션 메뉴를 선택하고 상황을 생성하세요.</p>
             </div>
-            <div id="guide-area" class="w3-panel w3-pale-yellow w3-leftbar w3-border-yellow hidden w3-padding w3-margin-top"></div>
+            <div id="guide-area" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden w3-padding w3-margin-top"></div>
         </div>
 
         <div class="w3-margin-top">
             <button id="gen-btn" class="w3-button w3-dark-grey w3-round-large w3-padding-large w3-block w3-margin-bottom">새 상황 생성</button>
-            <button class="w3-button w3-blue-grey w3-round-large w3-padding-large w3-block" onclick="toggleGuide()">지침 및 해설 확인</button>
+            <button class="w3-button w3-blue-grey w3-round-large w3-padding-large w3-block" onclick="toggleGuide()">지침 확인 (Rule)</button>
         </div>
     </div>
 
@@ -61,107 +62,24 @@
 </div>
 
 <script>
-/* 팀 컬러 정의 및 실제 CSS 컬러 매핑 */
 const teamColors = [
-    {name: "RED", hex: "#e74c3c"},
-    {name: "BLUE", hex: "#3498db"},
-    {name: "WHITE", hex: "#2c3e50"}, // 흰색은 가독성을 위해 짙은 회색 텍스트
-    {name: "BLACK", hex: "#000000"},
-    {name: "YELLOW", hex: "#f1c40f"},
-    {name: "GREEN", hex: "#27ae60"},
-    {name: "PURPLE", hex: "#9b59b6"}
+    {name: "WHITE", hex: "#444444"}, {name: "BLACK", hex: "#000000"},
+    {name: "RED", hex: "#e74c3c"}, {name: "BLUE", hex: "#3498db"},
+    {name: "YELLOW", hex: "#f1c40f"}, {name: "GREEN", hex: "#27ae60"}
 ];
 
-/* 기획서 2P/3P 데이터 */
+/* 기획서 2P: 리드 심판 표 내용 */
 const leadCases = [
-    {s: "드라이브 인 시 신체 접촉", g: "수비자의 합법적 수비 위치(LGP)와 수직권 확인."},
-    {s: "베이스라인 터치아웃", g: "리드 심판 전담. 즉각적인 신호와 공격 방향 지시."},
-    {s: "로우 포스트 몸싸움", g: "공격자와 수비자의 팔꿈치 사용 및 실린더 침범 감시."},
-    {s: "바스켓 인터피어런스", g: "림 위의 볼 터치 여부를 리드 포지션에서 정밀 판정."},
-    {s: "득점 후 드로인 관리", g: "베이스라인 이동 권한 유무와 드로인 위치 지정."}
+    {s: "드라이브 인 시 신체 접촉 발생", g: "수비자의 실린더 유지 및 합법적 가딩 포지션(LGP) 확인."},
+    {s: "베이스라인 터치아웃 상황", g: "리드 심판 전담 구역. 즉각적인 호각과 방향 시그널."},
+    {s: "로우 포스트 포스트 업 몸싸움", g: "공격자의 팔꿈치 사용 및 수비자의 밀기 파울 주의."},
+    {s: "슈팅 후 바스켓 인터피어런스", g: "림 위 볼의 터치 여부를 가장 가까운 위치에서 판정."},
+    {s: "필드 골 성공 후 드로인 관리", g: "베이스라인 이동 가능 여부 확인 및 엔드라인 관리."}
 ];
 
+/* 기획서 3P: 트레일 심판 표 내용 */
 const trailCases = [
-    {s: "3점슛 시도와 랜딩", g: "슈터의 발 위치 및 착지 공간(Landing Zone) 확보 확인."},
-    {s: "프론트코트 8초 체크", g: "볼 운반 시 시간 및 하프라인 바이얼레이션 감시."},
-    {s: "스크린 상황 판정", g: "스크리너의 합법적 위치 및 움직이는 스크린 여부 체크."},
-    {s: "하이 포스트 접촉", g: "핸드체킹 및 홀딩 파울을 트레일 시야에서 감시."},
-    {s: "쿼터 종료 버저비터", g: "경기 종료 전 볼이 손에서 떠났는지 최종 판정."}
-];
-
-function openTab(evt, name) {
-    document.getElementById('SimView').classList.add('hidden');
-    document.getElementById('QuizView').classList.add('hidden');
-    const links = document.getElementsByClassName("tablink");
-    for (let i = 0; i < links.length; i++) links[i].className = links[i].className.replace(" w3-orange", "");
-    
-    if (name === 'Quiz') {
-        document.getElementById('QuizView').classList.remove('hidden');
-    } else {
-        document.getElementById('SimView').classList.remove('hidden');
-        document.getElementById('gen-btn').onclick = function() { generateSitu(name); };
-    }
-    if(evt) evt.currentTarget.className += " w3-orange";
-}
-
-function generateSitu(mode) {
-    const quarters = ["1Q", "2Q", "3Q", "4Q", "OT"];
-    const q = quarters[Math.floor(Math.random()*quarters.length)];
-    const dir = (q === "1Q" || q === "2Q") ? "본인 벤치" : "상대 벤치";
-    
-    // 팀 컬러 랜덤 추출
-    const tA = teamColors[Math.floor(Math.random()*teamColors.length)];
-    let tB = teamColors[Math.floor(Math.random()*teamColors.length)];
-    while(tA.name === tB.name) tB = teamColors[Math.floor(Math.random()*teamColors.length)];
-    
-    const realPos = (mode === 'Total') ? (Math.random() > 0.5 ? '리드' : '트레일') : mode;
-    const caseData = (realPos === '리드') ? leadCases : trailCases;
-    const sc = caseData[Math.floor(Math.random()*caseData.length)];
-
-    // 7P 태그 출력
-    document.getElementById('tag-area').innerHTML = `
-        <div class="tag-block bg-pos">포지션: ${realPos}</div>
-        <div class="tag-block bg-qtr">쿼터: ${q}</div>
-        <div class="tag-block bg-dir">공격방향: ${dir}</div>
-    `;
-
-    // 팀 정보 출력 (텍스트 컬러 입히기)
-    let infoHtml = "";
-    if(realPos === '리드') {
-        infoHtml = `
-            <div class="team-info lead-view" style="color: ${tA.hex}">
-                [수비팀 정보] 컬러: ${tA.name} / 수직권 및 실린더 감시 우선
-            </div>
-            <div class="team-info" style="color: ${tB.hex}">
-                [공격팀 정보] 컬러: ${tB.name} / 베이스라인 돌파 상황
-            </div>
-        `;
-    } else {
-        infoHtml = `
-            <div class="team-info trail-view" style="color: ${tB.hex}">
-                [공격팀 정보] 컬러: ${tB.name} / 볼 핸들러 스텝 및 3점슛 감시 우선
-            </div>
-            <div class="team-info" style="color: ${tA.hex}">
-                [수비팀 정보] 컬러: ${tA.name} / 하이포스트 압박 및 스크린 체크
-            </div>
-        `;
-    }
-
-    document.getElementById('display-content').innerHTML = `
-        ${infoHtml}
-        <div class="w3-panel w3-leftbar w3-light-grey w3-padding-large w3-margin-top">
-            <b class="w3-text-dark-grey">실제 상황:</b><br>${sc.s}
-        </div>
-    `;
-    
-    document.getElementById('guide-area').innerHTML = `<b>💡 판정 지침:</b> ${sc.g}`;
-    document.getElementById('guide-area').classList.add('hidden');
-}
-
-function toggleGuide() { document.getElementById('guide-area').classList.toggle('hidden'); }
-
-window.onload = function() { openTab(null, 'Lead'); };
-</script>
-
-</body>
-</html>
+    {s: "외곽 3점슛 시도와 착지 공간", g: "슈터의 발 위치 및 수비자의 랜딩 구역 침범 확인."},
+    {s: "백코트 볼 운반 중 8초 바이얼레이션", g: "경기 시간 체크 및 프론트코트 진입 시점 감시."},
+    {s: "하이포스트 온볼 스크린 상황", g: "스크리너의 합법적 위치 및 일리걸 스크린 여부 판정."},
+    {s: "공격 전
