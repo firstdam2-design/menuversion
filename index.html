@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>농구심판연습 v1.4</title>
+    <title>농구심판연습 v1.6</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         :root { --main-dark: #2c3e50; --lead-red: #e74c3c; --trail-blue: #3498db; }
@@ -12,7 +12,7 @@
         .bg-pos { background-color: var(--main-dark); color: white; }
         .bg-qtr { background-color: #d35400; color: white; }
         .bg-dir { background-color: #27ae60; color: white; }
-        .card-main { min-height: 280px; background: white; border-radius: 12px; border-top: 6px solid var(--main-dark); position: relative; }
+        .card-main { min-height: 300px; background: white; border-radius: 12px; border-top: 6px solid var(--main-dark); position: relative; }
         .team-info { padding: 12px; border-radius: 8px; margin: 10px 0; font-weight: 500; border: 1px solid #eee; }
         .def-focus { border-left: 5px solid var(--lead-red); background-color: #fdf2f2; }
         .off-focus { border-left: 5px solid var(--trail-blue); background-color: #ebf5fb; }
@@ -20,7 +20,6 @@
         .btn-ox { font-size: 2.2em; width: 45%; margin: 2%; font-weight: bold; height: 100px; }
         .progress-bar { height: 10px; background-color: #eee; border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
         .progress-fill { height: 100%; background-color: #9b59b6; width: 0%; transition: 0.4s; }
-        .tablink { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -35,12 +34,10 @@
 <div class="w3-container w3-padding-24">
     
     <div id="SimView" class="tab-content">
-        <div id="tag-area" class="w3-margin-bottom">
-            <span class="tag-block bg-pos">[대기 중]</span>
-        </div>
+        <div id="tag-area" class="w3-margin-bottom"></div>
         <div class="w3-card-4 w3-padding card-main">
             <div id="display-content" class="w3-large w3-padding-16">
-                상단 메뉴 선택 후 <b>[새 상황 생성]</b> 버튼을 눌러주세요.
+                메뉴 선택 후 <b>[새 상황 생성]</b>을 눌러주세요.
             </div>
             <div id="guide-area" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden w3-padding"></div>
         </div>
@@ -54,7 +51,7 @@
         <div class="w3-card-4 w3-white w3-padding card-main" style="border-top-color: #9b59b6;">
             <div id="quiz-intro" class="w3-center w3-padding-48">
                 <h2 class="w3-text-purple"><b>심판 규칙 챌린지</b></h2>
-                <p>10문제 랜덤 출제 (OX/4지선다)<br>당신의 심판 등급을 확인하세요!</p>
+                <p>10문제 랜덤 풀기 (OX/4지선다)</p>
                 <button class="w3-button w3-purple w3-xlarge w3-round-xxlarge" onclick="initQuiz()">GAME START</button>
             </div>
             <div id="quiz-play" class="hidden">
@@ -76,61 +73,55 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
-/* 데이터 구성 */
-const scenarios = [
-    {s: "슛 동작 중 파울 (자유투 2개)", g: "슈팅 파울 판정 및 정확한 리포팅 연습 (제34조)"},
-    {s: "3점슛 동작 중 파울", g: "슈터의 발 위치와 수비자의 랜딩 구역 확보 확인"},
-    {s: "베이스라인 터치아웃", g: "리드 심판의 책임구역. 즉시 신호 후 공격권 부여"},
-    {s: "공격자 차징 파울", g: "수비자가 공격자의 경로에 합법적으로 먼저 자리를 잡았는지 확인"},
-    {s: "바스켓 카운트 및 추가 자유투", g: "파울 시점의 슛 동작 계속성(Continuous Motion) 확인"},
-    {s: "사이드라인 볼 경합", g: "트레일의 책임구역. 마지막 터치 선수 식별"}
+/* [기획서 2P 반영] 리드 심판 케이스 */
+const leadCases = [
+    {s: "드라이브 인 슛 시도 중 신체 접촉", g: "수비자의 실린더 및 합법적 수비 위치 확인 (제33조)"},
+    {s: "포스트 업 상황에서의 몸싸움", g: "공격자와 수비자의 팔꿈치 사용 및 리걸 가딩 포지션 확인"},
+    {s: "엔드라인 근처에서의 볼 경합", g: "리드 심판의 전담 구역. 터치아웃 판정 및 즉각적인 신호"},
+    {s: "로우 포스트 슛 동작 중 파울", g: "슈팅 동작의 시작 시점과 신체 접촉의 영향력 판단"},
+    {s: "골밑 득점 후 베이스라인 드로인", g: "득점 후 바이얼레이션 체크 및 드로인 위치 지정"}
+];
+
+/* [기획서 3P 반영] 트레일 심판 케이스 */
+const trailCases = [
+    {s: "3점 라인 밖에서의 슛 시도", g: "슈터의 발 위치(3점 여부) 및 랜딩 존 확보 확인"},
+    {s: "프론트코트로의 볼 운반 중 압박 수비", g: "8초 바이얼레이션 및 하프라인 바이얼레이션 감시"},
+    {s: "공격 전개 중 스크린 상황", g: "스크리너의 합법적 위치 및 움직이는 스크린 여부 판정"},
+    {s: "하이 포스트에서의 패스 전개", g: "트레일의 시야 범위 내 볼 핸들러와 수비자 거리 확인"},
+    {s: "공격자 파울 (오펜스 파울)", g: "볼과 떨어진 곳에서의 신체 접촉 및 스크린 파울 체크"}
 ];
 
 const quizBank = [
-    {t: "OX", q: "수비자가 수직권을 유지하며 점프해 접촉하면 파울이다.", a: false, g: "자신의 실린더 내 수직적 접촉은 파울이 아닙니다."},
-    {t: "OX", q: "볼이 백보드 뒷면에 닿으면 즉시 아웃 오브 바운드이다.", a: true, g: "백보드 뒷면은 경기장 밖(Out)으로 간주합니다."},
-    {t: "MC", q: "심판은 경기 시작 몇 분 전 코트에 도착해야 하는가?", o: ["10분", "20분", "30분", "45분"], a: 2, g: "FIBA IOT 매뉴얼 권고 사항은 30분 전입니다."},
-    {t: "OX", q: "드리블 중 선수의 발이 선에 닿으면 즉시 바이얼레이션이다.", a: true, g: "경계선을 밟는 것은 아웃 오브 바운드입니다."},
-    {t: "MC", q: "테크니컬 파울 발생 시 주어지는 자유투 개수는?", o: ["1개", "2개", "3개", "없음"], a: 0, g: "FIBA 기준 테크니컬 파울은 자유투 1개입니다."},
-    {t: "OX", q: "리드 심판은 항상 공격자를 우선적으로 감시해야 한다.", a: false, g: "리드는 수비자 위주의 오픈 앵글 확보가 기본입니다."},
-    {t: "MC", q: "공식 타임아웃의 지속 시간은?", o: ["30초", "50초", "60초", "90초"], a: 2, g: "FIBA 규칙상 타임아웃은 60초입니다."},
-    {t: "OX", q: "자유투 시 슛한 볼이 림에 닿기 전 라인을 밟으면 바이얼레이션이다.", a: true, g: "슈터는 볼이 림에 닿기 전까지 라인을 넘을 수 없습니다."},
-    {t: "MC", q: "U-파울의 벌칙으로 틀린 것은?", o: ["자유투 1개", "자유투 2개", "드로인 권한", "자유투 3개"], a: 0, g: "U파울 벌칙은 상황에 따라 2샷 또는 3샷과 드로인이 주어집니다."},
-    {t: "OX", q: "경기 종료 부저와 동시에 슛한 볼이 들어가면 점수 인정이다.", a: true, g: "부저 전 손을 떠난 볼은 유효한 득점입니다."}
+    {t: "OX", q: "리드 심판은 항상 수직권을 유지한 수비자의 실린더를 우선 감시해야 한다.", a: true, g: "리드는 골밑 신체 접촉 시 수비자의 실린더를 먼저 봅니다."},
+    {t: "MC", q: "트레일 심판이 주로 담당하는 판정 구역은?", o: ["베이스라인", "3점 라인 밖 및 하프라인", "제한구역 안", "림 바로 아래"], a: 1, g: "트레일은 경기 전체 흐름과 외곽 구역을 담당합니다."},
+    {t: "OX", q: "공격자가 슛 동작 중 수비자의 실린더를 침범해 발생한 접촉은 수비자 파울이다.", a: false, g: "수비자의 실린더 내에서는 공격자가 접촉의 책임을 집니다."},
+    {t: "MC", q: "심판의 2인제 운영(2PO)에서 리드와 트레일의 위치 선정 원칙은?", o: ["항상 마주보고 선다", "볼을 사이에 둔 대각선 유지", "한쪽 사이드라인에 선다", "자유롭게 선다"], a: 1, g: "대각선 위치 선정(Boxing-in)이 기본 원칙입니다."},
+    {t: "OX", q: "트레일 심판은 경기 시간과 샷클락 잔여 시간을 주기적으로 체크해야 한다.", a: true, g: "트레일은 경기 전체 운영과 시간 관리에 책임을 가집니다."}
+    // ... 추가 퀴즈는 quizBank에 계속 추가 가능
 ];
 
 let curQSet = [], curIdx = 0, curScore = 0;
 const colors = ["White", "Black", "Blue", "Red", "Yellow", "Orange", "Green"];
 const quarters = ["1Q", "2Q", "3Q", "4Q", "OT"];
 
-/* [핵심] 탭 제어 및 디버깅 */
 function openTab(evt, name) {
-    // 모든 섹션 숨기기
     document.getElementById('SimView').classList.add('hidden');
     document.getElementById('QuizView').classList.add('hidden');
-    
-    // 탭 버튼 스타일 초기화
     const tablinks = document.getElementsByClassName("tablink");
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" w3-orange", "");
-    }
-
+    for (let i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" w3-orange", "");
+    
     if (name === 'Quiz') {
         document.getElementById('QuizView').classList.remove('hidden');
     } else {
         document.getElementById('SimView').classList.remove('hidden');
-        // 생성 버튼 이벤트 재연결
         document.getElementById('gen-btn').onclick = function() { generateSitu(name); };
     }
-    
     if(evt) evt.currentTarget.className += " w3-orange";
 }
 
-/* 상황 생성 로직 */
 function generateSitu(mode) {
     const q = quarters[Math.floor(Math.random()*quarters.length)];
     const dir = (q === "1Q" || q === "2Q") ? "본인 벤치" : "상대 벤치";
@@ -139,23 +130,24 @@ function generateSitu(mode) {
     while(tA === tB) tB = colors[Math.floor(Math.random()*colors.length)];
     
     const realPos = (mode === 'Total') ? (Math.random() > 0.5 ? '리드' : '트레일') : mode;
-    const sc = scenarios[Math.floor(Math.random()*scenarios.length)];
+    
+    // 기획서 2,3P 기반 데이터 선택
+    const caseData = (realPos === '리드') ? leadCases : trailCases;
+    const sc = caseData[Math.floor(Math.random()*caseData.length)];
 
-    // 태그 출력
     document.getElementById('tag-area').innerHTML = `
         <span class="tag-block bg-pos">[${realPos}포지션]</span>
         <span class="tag-block bg-qtr">[${q}]</span>
         <span class="tag-block bg-dir">[${dir} 공격]</span>
     `;
 
-    // 텍스트 출력 (심판 시선 반영)
     let html = "";
     if(realPos === '리드') {
-        html = `<div class="team-info def-focus"><b>수비(수직권 감시):</b> ${tA}팀 - 실린더 접촉 주의</div>
-                <div class="team-info off-focus"><b>공격:</b> ${tB}팀 - 페인트존 돌파 시도</div>`;
+        html = `<div class="team-info def-focus"><b>수비(수직권/실린더):</b> ${tA}팀 - 골밑 수비 위치 확인</div>
+                <div class="team-info off-focus"><b>공격:</b> ${tB}팀 - 베이스라인 및 포스트 진입</div>`;
     } else {
-        html = `<div class="team-info off-focus"><b>공격(볼핸들러 감시):</b> ${tB}팀 - 바이얼레이션/흐름 체크</div>
-                <div class="team-info def-focus"><b>수비:</b> ${tA}팀 - 트레일 책임 구역 내 파울 감시</div>`;
+        info = html = `<div class="team-info off-focus"><b>공격(볼핸들러/3점):</b> ${tB}팀 - 외곽 전개 및 슛 시도</div>
+                <div class="team-info def-focus"><b>수비:</b> ${tA}팀 - 하이포스트 및 외곽 압박 수비</div>`;
     }
 
     document.getElementById('display-content').innerHTML = html + `<hr><b>발생 상황:</b> ${sc.s}`;
@@ -165,9 +157,9 @@ function generateSitu(mode) {
 
 function toggleGuide() { document.getElementById('guide-area').classList.toggle('hidden'); }
 
-/* 퀴즈 게임 엔진 */
+/* 퀴즈 엔진 */
 function initQuiz() {
-    curQSet = [...quizBank].sort(() => Math.random() - 0.5); // 전체 셔플
+    curQSet = [...quizBank].sort(() => Math.random() - 0.5).slice(0, 10);
     curIdx = 0; curScore = 0;
     document.getElementById('quiz-intro').classList.add('hidden');
     document.getElementById('quiz-result').classList.add('hidden');
@@ -176,16 +168,14 @@ function initQuiz() {
 }
 
 function renderQuestion() {
-    if(curIdx >= 10) return finishQuiz();
-    
+    if(curIdx >= 10 || curIdx >= curQSet.length) return finishQuiz();
     const q = curQSet[curIdx];
-    document.getElementById('quiz-idx-text').innerText = `${curIdx + 1} / 10`;
+    document.getElementById('quiz-idx-text').innerText = `${curIdx + 1} / ${Math.min(10, curQSet.length)}`;
     document.getElementById('quiz-score-text').innerText = `Score: ${curScore}`;
     document.getElementById('quiz-progress').style.width = `${(curIdx + 1) * 10}%`;
     document.getElementById('quiz-q').innerText = q.q;
     document.getElementById('quiz-fb').classList.add('hidden');
     document.getElementById('quiz-next-btn').classList.add('hidden');
-
     let optHtml = "";
     if(q.t === "OX") {
         optHtml = `<button class="w3-button w3-green w3-round btn-ox" onclick="ansQuiz(true)">O</button>
@@ -203,11 +193,9 @@ function ansQuiz(user) {
     const q = curQSet[curIdx];
     const fb = document.getElementById('quiz-fb');
     document.getElementById('quiz-options').style.pointerEvents = 'none';
-    
     const isCorrect = (user === q.a);
     if(isCorrect) curScore += 10;
-    
-    fb.innerHTML = `<b>${isCorrect ? '✅ 정답입니다!' : '❌ 오답입니다.'}</b><br><small>${q.g}</small>`;
+    fb.innerHTML = `<b>${isCorrect ? '✅ 정답!' : '❌ 오답'}</b><br><small>${q.g}</small>`;
     fb.classList.remove('hidden');
     document.getElementById('quiz-next-btn').classList.remove('hidden');
     curIdx++;
@@ -217,7 +205,7 @@ function finishQuiz() {
     document.getElementById('quiz-play').classList.add('hidden');
     document.getElementById('quiz-result').classList.remove('hidden');
     document.getElementById('final-score').innerText = curScore;
-    let rank = curScore >= 90 ? "🏆 국제심판 (FIBA급)" : curScore >= 70 ? "🥈 엘리트급" : "🥉 루키급";
+    let rank = curScore >= 90 ? "🏆 국제심판급" : curScore >= 70 ? "🥈 엘리트급" : "🥉 루키급";
     document.getElementById('final-rank').innerText = rank;
 }
 
@@ -226,9 +214,7 @@ function resetQuiz() {
     document.getElementById('quiz-intro').classList.remove('hidden');
 }
 
-// 초기 실행 (리드 탭)
 window.onload = function() { openTab(null, 'Lead'); };
 </script>
-
 </body>
 </html>
