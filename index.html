@@ -3,152 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketball Referee Training v1.0</title>
+    <title>농구심판연습 v1.3</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
-        :root { --main-orange: #e67e22; --main-dark: #2c3e50; }
-        body { background-color: #f4f7f6; font-family: 'Malgun Gothic', sans-serif; }
-        .w3-bar-item { cursor: pointer; }
-        .situation-card { min-height: 250px; border-left: 8px solid var(--main-orange); }
-        .team-label { font-weight: bold; padding: 2px 8px; border-radius: 4px; }
-        .btn-action { transition: 0.2s; font-weight: bold; }
-        .btn-action:hover { transform: scale(1.05); }
-        #log-area { max-height: 200px; overflow-y: auto; font-size: 0.9em; background: #eee; }
+        :root { --main-dark: #2c3e50; --lead-red: #e74c3c; --trail-blue: #3498db; }
+        body { background-color: #f1f3f5; font-family: 'Pretendard', sans-serif; margin: 0; }
+        .tag-block { display: inline-block; padding: 4px 10px; margin-right: 5px; border-radius: 4px; font-weight: bold; font-size: 0.85em; }
+        .bg-pos { background-color: var(--main-dark); color: white; }
+        .bg-qtr { background-color: #d35400; color: white; }
+        .bg-dir { background-color: #27ae60; color: white; }
+        .card-main { min-height: 250px; background: white; border-radius: 12px; border-top: 6px solid var(--main-dark); }
+        .team-info { padding: 12px; border-radius: 8px; margin: 10px 0; font-weight: 500; border: 1px solid #eee; }
+        .def-focus { border-left: 5px solid var(--lead-red); background-color: #fdf2f2; }
+        .off-focus { border-left: 5px solid var(--trail-blue); background-color: #ebf5fb; }
         .hidden { display: none; }
+        .btn-ox { font-size: 2.5em; width: 45%; margin: 2%; font-weight: bold; }
+        .progress-bar { height: 8px; background-color: #eee; border-radius: 10px; margin-bottom: 15px; }
+        .progress-fill { height: 100%; background-color: #9b59b6; border-radius: 10px; transition: 0.3s; }
     </style>
 </head>
 <body>
 
 <div class="w3-bar w3-black w3-card">
-    <span class="w3-bar-item w3-text-orange"><b>REF TRAINING</b></span>
-    <button class="w3-bar-item w3-button tablink w3-orange" onclick="openTab(event,'Lead')">리드(Lead)</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Trail')">트레일(Trail)</button>
-    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Settings')">설정/로그</button>
+    <button class="w3-bar-item w3-button tablink w3-orange" onclick="openTab(event,'Lead')">리드</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Trail')">트레일</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Total')">종합</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openTab(event,'Quiz')">퀴즈</button>
 </div>
 
-<div class="w3-container w3-padding-16">
-    <div id="Lead" class="tab-content">
-        <div class="w3-card-4 w3-white w3-padding situation-card">
-            <h3 class="w3-text-blue-grey"><i class="fa fa-eye"></i> Lead Position 연습</h3>
-            <div id="lead-display" class="w3-large w3-padding-16">
-                버튼을 눌러 연습 상황을 생성하세요.
-            </div>
-            <div id="lead-guide" class="w3-panel w3-pale-yellow w3-leftbar w3-border-yellow hidden">
-                </div>
-        </div>
-    </div>
-
-    <div id="Trail" class="tab-content" style="display:none">
-        <div class="w3-card-4 w3-white w3-padding situation-card" style="border-left-color: #2196F3;">
-            <h3 class="w3-text-blue-grey"><i class="fa fa-eye"></i> Trail Position 연습</h3>
-            <div id="trail-display" class="w3-large w3-padding-16">
-                버튼을 눌러 연습 상황을 생성하세요.
-            </div>
-            <div id="trail-guide" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden"></div>
-        </div>
-    </div>
-
-    <div class="w3-row-padding w3-margin-top">
-        <div class="w3-col s6">
-            <button onclick="generateRandomSituation()" class="w3-button w3-block w3-dark-grey w3-round-large btn-action">
-                새 상황 생성 (Random)
-            </button>
-        </div>
-        <div class="w3-col s6">
-            <button onclick="toggleGuide()" class="w3-button w3-block w3-orange w3-round-large btn-action">
-                지침/해설 보기
-            </button>
-        </div>
-    </div>
-
-    <div id="Settings" class="tab-content w3-margin-top" style="display:none">
-        <div class="w3-card w3-white w3-padding">
-            <h4>연습 기록 (History)</h4>
-            <div id="log-area" class="w3-padding w3-border"></div>
-            <button onclick="clearLog()" class="w3-button w3-small w3-red w3-margin-top">로그 삭제</button>
-        </div>
-    </div>
-</div>
-
-<script>
-// 기획서 데이터 반영
-const colors = ["White", "Black", "Blue", "Red", "Yellow", "Green", "Orange", "Gray", "Purple"];
-const quarters = ["1Q", "2Q", "3Q", "4Q", "연장"];
-const scenarios = [
-    { type: "Foul", desc: "드라이브 인 레이업 시 신체 접촉 발생", guide: "수비자의 실린더 침범 확인 (제33조). 리드는 발 위치와 핸드체킹 우선 확인." },
-    { type: "Violation", desc: "피벗 발이 떨어진 후 드리블 시작", guide: "트레블링 바이얼레이션 (제25조). 축발(Pivot foot)의 고정 여부 스캔." },
-    { type: "Out", desc: "사이드라인 근처 볼 경합", guide: "누가 마지막에 터치했는가? 리드는 엔드라인, 트레일은 사이드라인 분담." },
-    { type: "Shot Clock", desc: "림을 맞지 않은 에어볼 상황", guide: "샷클락 리셋 금지. 경기는 그대로 진행(No Call)." }
-];
-
-let currentPos = "Lead";
-
-function openTab(evt, tabName) {
-    currentPos = tabName;
-    let i, x, tablinks;
-    x = document.getElementsByClassName("tab-content");
-    for (i = 0; i < x.length; i++) { x[i].style.display = "none"; }
-    tablinks = document.getElementsByClassName("tablink");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" w3-orange", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    if(evt) evt.currentTarget.className += " w3-orange";
-}
-
-function generateRandomSituation() {
-    const q = quarters[Math.floor(Math.random() * quarters.length)];
-    const teamA = colors[Math.floor(Math.random() * colors.length)];
-    let teamB = colors[Math.floor(Math.random() * colors.length)];
-    while(teamA === teamB) teamB = colors[Math.floor(Math.random() * colors.length)];
+<div class="w3-container w3-padding-24">
     
-    const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-    const isFirstHalf = (q === "1Q" || q === "2Q");
-    const direction = isFirstHalf ? "본인 벤치 방향" : "상대 벤치 방향";
-
-    // 화면 업데이트
-    const displayId = currentPos.toLowerCase() + "-display";
-    const guideId = currentPos.toLowerCase() + "-guide";
-    
-    const html = `
-        <span class="w3-tag w3-round w3-blue">${q}</span> 
-        <span class="w3-tag w3-round w3-dark-grey">${direction} 공격</span><br><br>
-        <b>공격팀:</b> <span class="team-label" style="background:${teamA.toLowerCase()}; color:${getContrastYIQ(teamA)}">${teamA}</span> 
-        &nbsp; vs &nbsp;
-        <b>수비팀:</b> <span class="team-label" style="background:${teamB.toLowerCase()}; color:${getContrastYIQ(teamB)}">${teamB}</span><br><br>
-        <div class="w3-panel w3-leftbar w3-light-grey w3-padding">
-            <b>상황:</b> ${scenario.desc}
-        </div>
-    `;
-    
-    document.getElementById(displayId).innerHTML = html;
-    document.getElementById(guideId).innerHTML = `<b>판정 지침:</b> ${scenario.guide}`;
-    document.getElementById(guideId).classList.add('hidden'); // 새 상황 시 지침 숨김
-
-    addLog(`[${currentPos}] ${q} - ${scenario.type} 상황 발생`);
-}
-
-function toggleGuide() {
-    const guideId = currentPos.toLowerCase() + "-guide";
-    const guide = document.getElementById(guideId);
-    guide.classList.toggle('hidden');
-}
-
-// 팀 컬러에 따른 텍스트 색상 결정 (가독성)
-function getContrastYIQ(hexcolor){
-    const colorsMap = {"White":"#000", "Black":"#fff", "Blue":"#fff", "Red":"#fff", "Yellow":"#000", "Green":"#fff", "Orange":"#000", "Gray":"#fff", "Purple":"#fff"};
-    return colorsMap[hexcolor] || "#000";
-}
-
-function addLog(msg) {
-    const logArea = document.getElementById('log-area');
-    const now = new Date();
-    const timeStr = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-    logArea.innerHTML = `<div>[${timeStr}] ${msg}</div>` + logArea.innerHTML;
-}
-
-function clearLog() { document.getElementById('log-area').innerHTML = ""; }
-</script>
-
-</body>
-</html>
+    <div id="SimView" class="tab-content">
+        <div id="tag-area" class="w3-margin-bottom"></div>
+        <div class="w3-card-4 w3-padding card-main">
+            <div id="display-content" class="w3-
