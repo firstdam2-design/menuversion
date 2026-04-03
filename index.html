@@ -3,111 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>농구심판연습 v2.1</title>
+    <title>농구심판연습 v2.3</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         :root { --main-dark: #2c3e50; --lead-red: #e74c3c; --trail-blue: #3498db; }
-        body { background-color: #f4f7f6; font-family: 'Malgun Gothic', sans-serif; margin: 0; }
+        body { background-color: #f1f3f5; font-family: 'Malgun Gothic', sans-serif; margin: 0; padding-bottom: 50px; }
         
-        /* 헤더 타이틀 및 버전 */
-        .app-header { background-color: var(--main-dark); color: white; padding: 15px; text-align: center; }
-        .version-tag { font-size: 0.75em; color: #95a5a6; font-weight: normal; margin-left: 5px; }
+        /* 헤더 및 타이틀 */
+        .header { background-color: var(--main-dark); color: white; padding: 15px; text-align: center; border-bottom: 4px solid #1a252f; }
+        .ver { font-size: 0.7em; color: #bdc3c7; font-weight: normal; margin-left: 5px; }
+
+        /* 탭 메뉴 */
+        .tab-bar { display: flex; background: #ddd; border-bottom: 1px solid #ccc; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; cursor: pointer; transition: 0.3s; color: #555; }
+        .tab-active { background: #ff9800 !important; color: white !important; }
 
         /* 기획서 7P: 상단 태그 레이아웃 */
-        .tag-row { display: flex; gap: 6px; justify-content: center; margin: 15px 0; }
-        .tag-item { padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em; color: white; }
+        .tag-area { display: flex; gap: 6px; justify-content: center; margin: 20px 0; min-height: 32px; }
+        .tag { padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .tag-pos { background-color: #34495e; }
         .tag-qtr { background-color: #d35400; }
         .tag-dir { background-color: #27ae60; }
 
-        /* 메인 카드 박스 */
-        .card-main { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 20px; max-width: 550px; margin: 0 auto; border-top: 6px solid var(--main-dark); }
-        
-        /* 기획서 7P: 정보 박스 (괄호 없이 깔끔하게) */
-        .team-box { padding: 14px; border-radius: 8px; margin: 8px 0; font-weight: 900; font-size: 1.25em; border: 1px solid #eee; text-align: center; }
-        .focus-lead { border-left: 10px solid var(--lead-red); background-color: #fff9f9; }
-        .focus-trail { border-left: 10px solid var(--trail-blue); background-color: #f9fcff; }
+        /* 중앙 카드 */
+        .main-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; max-width: 500px; margin: 0 auto; border-top: 8px solid var(--main-dark); }
+        .info-box { padding: 14px; border-radius: 8px; margin: 10px 0; font-weight: 900; font-size: 1.3em; border: 1px solid #eee; text-align: center; }
+        .l-border { border-left: 10px solid var(--lead-red); background-color: #fff9f9; }
+        .t-border { border-left: 10px solid var(--trail-blue); background-color: #f9fcff; }
         
         /* 기획서 7P: 점선 상황 박스 */
-        .situ-box { border: 2px dashed #ccc; padding: 18px; margin-top: 15px; border-radius: 8px; background-color: #fafafa; position: relative; }
-        .situ-label { color: #888; font-weight: bold; font-size: 0.8em; display: block; margin-bottom: 6px; }
-        .situ-text { font-size: 1.1em; line-height: 1.5; color: #222; font-weight: 500; }
+        .situ-container { border: 2px dashed #bbb; padding: 18px; margin-top: 15px; border-radius: 8px; background-color: #fafafa; text-align: left; }
+        .situ-label { color: #888; font-size: 0.8em; font-weight: bold; display: block; margin-bottom: 6px; }
+        .situ-text { font-size: 1.15em; line-height: 1.6; color: #222; font-weight: 500; word-break: keep-all; }
 
         .hidden { display: none !important; }
-        .tablink { font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .w3-orange { color: white !important; }
+        .btn-gen { background-color: var(--main-dark); color: white; border: none; padding: 16px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1.1em; }
+        .btn-guide { background: white; border: 1px solid #ccc; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 0.9em; color: #666; }
     </style>
 </head>
 <body>
 
-<div class="app-header">
-    <h3 style="margin:0;"><b>농구심판연습</b> <span class="version-tag">v2.1</span></h3>
+<div class="header">
+    <h3 style="margin:0;"><b>농구심판연습</b> <span class="ver">v2.3</span></h3>
 </div>
 
-<div class="w3-bar w3-light-grey w3-border-bottom">
-    <button class="w3-bar-item w3-button tablink" id="tab-Lead" onclick="changeTab('Lead')">리드</button>
-    <button class="w3-bar-item w3-button tablink" id="tab-Trail" onclick="changeTab('Trail')">트레일</button>
-    <button class="w3-bar-item w3-button tablink" id="tab-Total" onclick="changeTab('Total')">종합</button>
-    <button class="w3-bar-item w3-button tablink" id="tab-Quiz" onclick="changeTab('Quiz')">퀴즈</button>
+<div class="tab-bar">
+    <button class="tab-btn tab-active" id="btn-Lead" onclick="setTab('Lead')">리드</button>
+    <button class="tab-btn" id="btn-Trail" onclick="setTab('Trail')">트레일</button>
+    <button class="tab-btn" id="btn-Total" onclick="setTab('Total')">종합</button>
+    <button class="tab-btn" id="btn-Quiz" onclick="setTab('Quiz')">퀴즈</button>
 </div>
 
 <div class="w3-container w3-padding-24">
-    
-    <div id="SimSection">
-        <div id="tag-area" class="tag-row"></div>
+    <div id="SimView">
+        <div id="tag-display" class="tag-area"></div>
         
-        <div class="card-main">
-            <div id="display-area">
-                <p class="w3-center w3-padding-48 w3-text-grey">포지션 선택 후 <b>[새 상황 생성]</b> 버튼을 누르세요.</p>
+        <div class="main-card">
+            <div id="content-display">
+                <p style="text-align:center; color:#999; padding: 40px 0;">상단 탭을 선택하고 상황을 생성하세요.</p>
             </div>
             
             <div id="guide-box" class="w3-panel w3-pale-blue w3-leftbar w3-border-blue hidden w3-padding w3-small"></div>
             
-            <div class="w3-margin-top">
-                <button onclick="handleGenerate()" class="w3-button w3-dark-grey w3-block w3-round-large w3-padding-large">새 상황 생성</button>
-                <button onclick="toggleGuide()" class="w3-button w3-white w3-border w3-block w3-round-large w3-margin-top">지침 확인 (해설)</button>
-            </div>
+            <button class="btn-gen" onclick="runGenerate()">새 상황 생성</button>
+            <button class="btn-guide" onclick="toggleHelp()">지침 확인 (Rule)</button>
         </div>
     </div>
 
-    <div id="QuizSection" class="hidden">
-        <div class="card-main w3-center w3-padding-64">
-            <h4><b>퀴즈 엔진</b></h4>
-            <p>준비된 퀴즈 시스템을 실행합니다.</p>
-            <button class="w3-button w3-purple w3-round">START QUIZ</button>
+    <div id="QuizView" class="hidden">
+        <div class="main-card w3-center w3-padding-64">
+            <h4><b>퀴즈 모드</b></h4>
+            <p>준비 중인 기능입니다.</p>
         </div>
     </div>
-
 </div>
 
 <script>
-/* 데이터 정의 (기획서 2, 3P 표 내용) */
-const leadData = [
-    {s: "드라이브 인 슛 시도 중 수비자 실린더 침범 및 신체 접촉 발생", g: "리드: 수비자의 LGP 유지 여부와 수직권 침범을 우선 확인."},
-    {s: "베이스라인(엔드라인) 부근 볼 경합 및 아웃 오브 바운드", g: "리드: 전담 구역으로서 즉각적인 방향 지시와 신호 필수."},
-    {s: "로우 포스트 몸싸움 중 공격자의 팔꿈치 과도 사용", g: "리드: 공격자의 부자연스러운 동작 및 오펜스 파울 감시."},
-    {s: "슈팅 후 볼이 림 위에 있을 때 수비자의 터치", g: "리드: 바스켓 인터피어런스/골텐딩 여부를 정밀 판정."}
+/* 고정 데이터 */
+const leadItems = [
+    {s: "드라이브 인 슛 시도 중 수비자 실린더 침범 및 신체 접촉 발생", g: "리드: 수비자의 LGP(합법적 수비위치)와 수직권 침범을 우선 판정."},
+    {s: "베이스라인(엔드라인) 부근 볼 경합 및 터치아웃 상황", g: "리드: 즉각적인 호각과 정확한 공격 방향 시그널 (전담 구역)."},
+    {s: "로우 포스트 몸싸움 중 공격자의 팔꿈치 과도 사용", g: "리드: 공격자의 부자연스러운 팔 동작 및 실린더 침범 확인."},
+    {s: "슛 상황에서 볼이 림 위에 있을 때 수비자의 터치", g: "리드: 바스켓 인터피어런스/골텐딩 여부를 가장 가까운 위치에서 판정."}
 ];
 
-const trailData = [
+const trailItems = [
     {s: "외곽 3점슛 시도 시 수비자의 랜딩 존(착지 공간) 침범", g: "트레일: 슈터의 발 위치 확인 및 착지 시 안전 확보 여부 판정."},
     {s: "프론트코트 볼 운반 중 8초 바이얼레이션 발생", g: "트레일: 하프라인 진입 시간 주기적 체크 및 바이얼레이션 선언."},
-    {s: "하이포스트 온볼 스크린 중 스크리너의 불법적 이동", g: "트레일: 스크리너의 실린더와 이동 경로 방해 여부 확인."},
-    {s: "쿼터 종료 부저와 동시 시도된 슛의 득점 인정 여부", g: "트레일: 종료 시그널 전 볼 이탈 여부 최종 결정권자."}
+    {s: "하이포스트 온볼 스크린 중 스크리너의 불법적 이동", g: "트레일: 스크리너의 발 고정 여부 및 이동 경로 방해 확인."},
+    {s: "쿼터 종료 부저와 동시 시도된 슛의 득점 인정 여부", g: "트레일: 종료 시그널 전 볼이 손에서 떠났는지 최종 결정."}
 ];
 
-const teamColors = [
-    {n: "WHITE", c: "#444444"}, {n: "BLACK", c: "#000000"},
-    {n: "RED", c: "#e74c3c"}, {n: "BLUE", c: "#3498db"},
-    {n: "YELLOW", c: "#b7950b"}, {n: "GREEN", c: "#1e8449"}
+const colors = [
+    {n: "WHITE", c: "#444"}, {n: "BLACK", c: "#000"}, {n: "RED", c: "#e74c3c"}, 
+    {n: "BLUE", c: "#3498db"}, {n: "YELLOW", c: "#b7950b"}, {n: "GREEN", c: "#1e8449"}
 ];
 
-let activeMode = 'Lead';
+let activeTab = 'Lead';
 
-/* 탭 전환 로직 디버깅 완료 */
-function changeTab(mode) {
-    activeMode = mode;
+/* 탭 변경 함수 */
+function setTab(mode) {
+    activeTab = mode;
     
-    // 섹션 표시 전환
-    document.getElementById('SimSection').style.display = (mode === 'Quiz') ? 'none' : 'block';
-    document.getElementById('QuizSection').
+    // 1. 탭 버튼 스타일 업데이트
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+    document.getElementById('btn-' + mode).classList.add('tab-active');
+    
+    // 2. 화면 전환
+    if(mode === 'Quiz') {
+        document.getElementById('SimView').classList.add('hidden');
+        document.getElementById('QuizView').classList.remove('hidden');
+    } else {
+        document.getElementById('SimView').classList.remove('hidden');
+        document.getElementById('QuizView').classList.add('hidden');
+        
+        // 초기화 메세지
+        document.getElementById('tag-display').innerHTML = "";
+        document.getElementById('content-display').innerHTML = `<p style="text-align:center; color:#999; padding: 40px 0;">[${mode}] 모드 활성화<br>버튼을 눌러 상황을 생성하세요.</p>`;
+        document.getElementById('guide-box').classList.add('hidden');
+    }
+}
+
+/* 상황 생성 함수 (기획서 7P 포맷) */
+function runGenerate() {
+    const q = ["1Q", "2Q", "3Q", "4Q", "OT"][Math.floor(Math.random()*5)];
+    const dir = (q === "1Q" || q === "2Q") ? "본인 벤치" : "상대 벤치";
+    
+    // 팀 컬러 (중복 방지)
+    const tA = colors[Math.floor(Math.random()*colors.length)];
+    let tB = colors[Math.floor(Math.random()*colors.length)];
+    while(tA.n === tB.n) tB = colors[Math.floor(Math.random()*colors.length)];
+    
+    // 포지션 결정
+    let pos = activeTab === 'Total' ? (Math.random() > 0.5 ? 'Lead' : 'Trail') : activeTab;
+    const items = (pos === 'Lead') ? leadItems : trailItems;
+    const item = items[Math.floor(Math.random()*items.length)];
+
+    // 7P 태그
+    document.getElementById('tag-display').innerHTML = `
+        <div class="tag tag-pos">상태: ${pos === 'Lead' ? '리드' : '트레일'}</div>
+        <div class="tag tag-qtr">쿼터: ${q}</div>
+        <div class="tag tag-dir">방향: ${dir}</div>
+    `;
+
+    // 7P 팀 정보 우선순위 (괄호 삭제)
+    let info = "";
+    if(pos === 'Lead') {
+        info = `<div class="info-box l-border" style="color:${tA.c}">수비팀: ${tA.n}</div>
+                <div class="info-box" style="color:${tB.n === 'WHITE' ? '#444' : tB.c}">공격팀: ${tB.n}</div>`;
+    } else {
+        info = `<div class="info-box t-border" style="color:${tB.c}">공격팀: ${tB.n}</div>
+                <div class="info-box" style="color:${tA.n === 'WHITE' ? '#444' : tA.c}">수비팀: ${tA.n}</div>`;
+    }
+
+    // 7P 상황 박스
+    document.getElementById('content-display').innerHTML = `
+        ${info}
+        <div class="situ-container">
+            <span class="situ-label">[발생 상황]</span>
+            <div class="situ-text">${item.s}</div>
+        </div>
+    `;
+    
+    document.getElementById('guide-box').innerHTML = `<b>💡 Rule:</b> ${item.g}`;
+    document.getElementById('guide-box').classList.add('hidden');
+}
+
+function toggleHelp() {
+    document.getElementById('guide-box').classList.toggle('hidden');
+}
+
+/* 초기 실행 */
+window.onload = () => setTab('Lead');
+</script>
+</body>
+</html>
